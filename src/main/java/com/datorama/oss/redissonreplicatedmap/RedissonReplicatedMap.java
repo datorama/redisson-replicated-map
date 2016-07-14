@@ -1,10 +1,14 @@
 package com.datorama.oss.redissonreplicatedmap;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.redisson.RedissonClient;
 import org.redisson.core.MessageListener;
@@ -25,11 +29,32 @@ public class RedissonReplicatedMap<K, V> implements Map<K, V> {
 	private RMap<K, V> distributedMap;
 	private RTopic<Message> topic;
 	private String instanceId;
+	private ScheduledExecutorService executor;
 
 	public RedissonReplicatedMap(RedissonClient redissonClient, String mapName) {
+		init(redissonClient, mapName, -1, TimeUnit.SECONDS);
+	}
+
+	public RedissonReplicatedMap(RedissonClient redissonClient, String mapName, Integer syncInterval, TimeUnit timeUnit) {
+		init(redissonClient, mapName, syncInterval, timeUnit);
+	}
+
+	public void init(RedissonClient redissonClient, String mapName, Integer syncInterval, TimeUnit timeUnit) {
 
 		this.redissonClient = redissonClient;
 		this.mapName = mapName;
+
+		// set up automated sync
+		if (syncInterval > 0) {
+			executor = Executors.newScheduledThreadPool(1);
+			executor.scheduleAtFixedRate(new Runnable() {
+				@Override
+				public void run() {
+					LOG.debug("sync map: " + mapName + ", " + new Date());
+					syncLocalMapWithRemote(false);
+				}
+			}, 1, syncInterval, timeUnit);
+		}
 
 		// instance ID must be unique
 		UUID uuid = UUID.randomUUID();
@@ -64,16 +89,31 @@ public class RedissonReplicatedMap<K, V> implements Map<K, V> {
 		});
 
 		// fill the local map
-		syncLocalMapWithRemote();
+		syncLocalMapWithRemote(false);
 
+	}
+
+	public void cleanUp() {
+		if (executor != null) {
+			executor.shutdown();
+			try {
+				if (!executor.awaitTermination(2, TimeUnit.SECONDS)) {
+					LOG.error("failed to kill all executor threads, forcing shutdownNow");
+					executor.shutdownNow();
+				}
+			} catch (InterruptedException e) {
+				LOG.error("cleanUp-> error", e);
+			}
+		}
 	}
 
 	public void syncRemoteMapWithLocal() {
 		distributedMap.putAll(internalMap);
 	}
 
-	public void syncLocalMapWithRemote() {
-		internalMap.clear();
+	public void syncLocalMapWithRemote(boolean clearMap) {
+		if (clearMap)
+			internalMap.clear();
 		// we use the readAll to reduce the number of network round trips
 		for (Entry<K, V> entry : distributedMap.readAllEntrySet()) {
 			internalMap.put(entry.getKey(), entry.getValue());
