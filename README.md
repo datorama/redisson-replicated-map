@@ -20,3 +20,14 @@ redisson.shutdown();
 ```
 ## Note that...
 Each RedissonReplicatedMap instance basically registers to the messaging channel so every change to every instance will trigger a change in all other instances (in process and out of process) that are using the same replicated map name ("myReplicatedMap" in the above example)
+
+
+### Maven 
+
+Include the following to your dependency list:
+
+	<dependency>
+	  <groupId>com.datorama.oss</groupId>
+	  <artifactId>redison-replicated-map</artifactId>
+	  <version>1.0.0</version>
+	</dependency>
