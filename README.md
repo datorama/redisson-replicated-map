@@ -28,6 +28,6 @@ Include the following to your dependency list:
 
 	<dependency>
 	  <groupId>com.datorama.oss</groupId>
-	  <artifactId>redison-replicated-map</artifactId>
+	  <artifactId>redisson-replicated-map</artifactId>
 	  <version>1.0.0</version>
 	</dependency>
