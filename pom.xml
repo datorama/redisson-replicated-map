@@ -3,7 +3,46 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.datorama.oss</groupId>
 	<artifactId>redison-replicated-map</artifactId>
-	<version>0.0.1</version>
+	<version>1.0.0</version>
+	<packaging>jar</packaging>
+
+	<name>Redisson Replicated Map</name>
+	<description>Replicated map implementation on top of Redission (Redis java client)</description>
+	<url>https://github.com/datorama/redisson-replicated-map</url>
+
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<name>Efi Cohen</name>
+			<organization>Datorama</organization>
+			<organizationUrl>http://www.datorama.com</organizationUrl>
+		</developer>
+	</developers>
+
+	<scm>
+		<connection>scm:git:git://github.com/datorama/redisson-replicated-map.git</connection>
+		<developerConnection>scm:git:ssh://github.com:datorama/redisson-replicated-map.git</developerConnection>
+		<url>https://github.com/datorama/redisson-replicated-map/tree/master</url>
+	</scm>
+
+	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
+	
 
 	<dependencies>
 
@@ -14,9 +53,9 @@
 		</dependency>
 
 		<dependency>
-		  <groupId>org.slf4j</groupId>
-		  <artifactId>slf4j-simple</artifactId>
-		  <version>1.7.21</version>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>1.7.21</version>
 		</dependency>
 
 		<dependency>
@@ -44,6 +83,61 @@
 				<artifactId>maven-surefire-report-plugin</artifactId>
 				<version>2.19</version>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<version>1.5</version>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			
+			<plugin>
+			  <groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<version>1.6.7</version>
+				<extensions>true</extensions>
+				<configuration>
+					<serverId>ossrh</serverId>
+					<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+					<autoReleaseAfterClose>true</autoReleaseAfterClose>
+				</configuration>
+			</plugin>
+		
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.2.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.9.1</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			
 		</plugins>
 
 	</build>
